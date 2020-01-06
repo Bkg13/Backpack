@@ -12,62 +12,67 @@ b) jedno rozwiązanie jest dopuszczalne i jedno nie jest dopuszczalne (plecak zo
 c) oba rozwiązania są niedopuszczalne (oba przepełniają plecak), wybieramy to gdzie przepełnienie jest mniejsze
 flagi, cot ot jest przerwanie, stos, co jest na stosie, jakie są rejestry, co to jest tryb DMA, przepełnienie, nadmiar, rozkazy działające na łańcuchach danych, flagi */
 
-const n = 100;
+const n = 200;
 const backpackV = 3000;
-const parent = [];
-const descendant = [];
+let parent = [];
+let descendant = [];
 const things = [];
-const finish = false;
+let finish = false;
 
 const getRand = (a, b) => {
   const min = Math.ceil(a);
   const max = Math.floor(b);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  const result = Math.floor(Math.random() * (max - min + 1)) + min;
+  return result;
 };
 
-console.log(Math.ceil(11.1));
+// console.log(Math.ceil(11.1));
 
 const fillParent = () => {
   for (let i = 0; i < n; i++) {
     parent.push(getRand(0, 1));
   }
-  console.log(parent);
+  // console.log(parent);
 };
 
 const copyDescendant = () => {
+  descendant = [];
   for (value of parent) {
     descendant.push(value);
   }
-  console.log(descendant);
+  // console.log(descendant);
 };
 
 const generateThings = () => {
   for (let i = 0; i < n; i++) {
-    things.push(getRand(10, 100));
+    things.push(getRand(10, 20));
+    //console.log(things.length);
   }
-  console.log(things);
+  // console.log(things);
 };
 
 const mutatesDescendant = () => {
-  const randIndex = getRand(0, 99);
-  console.log(descendant[randIndex]);
+  const randIndex = getRand(0, n - 1);
+  // console.log(descendant[randIndex]);
   descendant[randIndex] = descendant[randIndex] == 1 ? 0 : 1;
-  console.log(descendant[randIndex]);
+  // console.log(descendant[randIndex]);
 };
 
 const chooseBetter = () => {
   let parentBackpack = 0;
   let descendantBackpack = 0;
+  //console.log(descendant);
+  //console.log(things);
   for (const [i, value] of parent.entries()) {
     value ? (parentBackpack += things[i]) : null;
   }
   for (const [i, value] of descendant.entries()) {
     value ? (descendantBackpack += things[i]) : null;
   }
-  console.log(`parent backpack:
+  /*   console.log(`parent backpack:
     ${parentBackpack}`);
   console.log(`descendant backpack:
-    ${descendantBackpack}`);
+    ${descendantBackpack}`); */
   if (parentBackpack == backpackV) {
     finish = true;
     return parent;
@@ -78,31 +83,31 @@ const chooseBetter = () => {
   }
 
   if (parentBackpack > backpackV && descendantBackpack <= backpackV) {
-    console.log('Winner descendant');
+    // console.log('Winner descendant');
     return descendant;
   }
 
   if (descendantBackpack > backpackV && parentBackpack <= backpackV) {
-    console.log('Winner parent');
+    // console.log('Winner parent');
     return parent;
   }
 
   if (parentBackpack > backpackV && descendantBackpack > backpackV) {
     if (parentBackpack > descendantBackpack) {
-      console.log('Winner descendant');
+      // console.log('Winner descendant');
       return descendant;
     } else {
-      console.log('Winner parent');
+      // console.log('Winner parent');
       return parent;
     }
   }
 
   if (parentBackpack <= backpackV && descendantBackpack <= backpackV) {
     if (descendantBackpack >= parentBackpack) {
-      console.log('Winner descendant');
+      // console.log('Winner descendant');
       return descendant;
     } else {
-      console.log('Winner parent');
+      // console.log('Winner parent');
       return parent;
     }
   }
@@ -117,16 +122,47 @@ const init = () => {
 
 init();
 
-for (let i = 0; i < 3000; i++) {
-  const tempFill = 0;
-  for (const value of chooseBetter()) {
-    parent;
+const returnFinalResult = () => {
+  let tempFill = 0;
+  for (let i = 0; i < 1000; i++) {
+    setTimeout(() => {
+      clearBackpack();
+      tempFill = 0;
+      let tempParent = [];
+      for (const value of chooseBetter()) {
+        // console.log(value);
+        tempParent.push(value);
+      }
+      parent = [...tempParent];
+      copyDescendant();
+      mutatesDescendant();
+      for (const [i, value] of parent.entries()) {
+        value ? (tempFill += things[i]) : null;
+      }
+      fillBackpack(tempFill);
+      console.log(tempFill);
+    }, i);
+    if (finish) break;
+    // console.log(tempFill);
   }
-  copyDescendant();
-  mutatesDescendant();
-  for (const [i, value] of parent.entries()) {
-    value ? (fill += things[i]) : null;
-  }
-  console.log(tempFill);
-  if (finish) break;
-}
+  return tempFill;
+};
+
+const fillBackpack = tempFill => {
+  const element = document.createElement('div');
+  const emptyElement = document.querySelector('.empty');
+  const backpackElement = document.querySelector('.backpack');
+  const sizeElement = document.querySelector('.size');
+  element.className = 'thing';
+  element.style.height = `${tempFill / 10}px`;
+  sizeElement.innerText = tempFill;
+  backpackElement.appendChild(element);
+  emptyElement.style.height = `${(3000 - tempFill) / 10}px`;
+};
+
+const clearBackpack = () => {
+  const thing = document.querySelector('.thing');
+  thing ? thing.remove() : null;
+};
+
+console.log(returnFinalResult());
